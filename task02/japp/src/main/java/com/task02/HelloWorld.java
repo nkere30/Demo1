@@ -40,12 +40,12 @@ public class HelloWorld implements RequestHandler<Object, Map<String, Object>> {
 
         if("/hello".equals(path) && "GET".equals(method)){
             resultMap.put("statusCode", 200);
-            resultMap.put("message", "Hello from Lambda");
+            resultMap.put("body", "Hello from Lambda");
             return resultMap;
         }
 
         resultMap.put("statusCode", 400);
-        resultMap.put("message", "Bad request syntax or unsupported method. Request path: " +
+        resultMap.put("body", "Bad request syntax or unsupported method. Request path: " +
                 path +  ". HTTP method: " + method);
 
         return resultMap;
