@@ -5,11 +5,12 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.syndicate.deployment.annotations.lambda.LambdaHandler;
 import com.syndicate.deployment.model.RetentionSetting;
 import com.syndicate.deployment.annotations.lambda.LambdaUrlConfig;
+import com.syndicate.deployment.model.lambda.url.AuthType;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@LambdaUrlConfig
+@LambdaUrlConfig(authType = AuthType.NONE)
 @LambdaHandler(
     lambdaName = "hello_world",
 	roleName = "hello_world-role",
@@ -24,8 +25,16 @@ public class HelloWorld implements RequestHandler<Object, Map<String, Object>> {
         System.out.println("Hello from Lambda");
 
         Map<String, Object> requestMap = (Map<String, Object>) request;
-        String path = (String) requestMap.get("path");
-        String method = (String) requestMap.get("httpMethod");
+
+
+        Map<String, Object> requestContext =
+                (Map<String, Object>) requestMap.get("requestContext");
+        Map<String, Object> http =
+                (Map<String, Object>) requestContext.get("http");
+
+        String path = (String) http.get("path");
+        String method = (String) http.get("method");
+
 
         Map<String, Object> resultMap = new HashMap<>();
 
