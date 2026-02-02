@@ -6,11 +6,13 @@ import com.syndicate.deployment.annotations.lambda.LambdaHandler;
 import com.syndicate.deployment.model.RetentionSetting;
 import com.syndicate.deployment.annotations.lambda.LambdaUrlConfig;
 import com.syndicate.deployment.model.lambda.url.AuthType;
+import com.syndicate.deployment.model.lambda.url.InvokeMode;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@LambdaUrlConfig(authType = AuthType.NONE)
+@LambdaUrlConfig(authType = AuthType.NONE,
+invokeMode = InvokeMode.BUFFERED)
 @LambdaHandler(
     lambdaName = "hello_world",
 	roleName = "hello_world-role",
