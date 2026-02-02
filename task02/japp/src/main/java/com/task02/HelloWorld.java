@@ -36,20 +36,20 @@ public class HelloWorld implements RequestHandler<Object, Map<String, Object>> {
         Map<String, Object> response = new HashMap<>();
 
         if ("/hello".equals(path) && "GET".equals(method)) {
-            response.put(
-                    "body",
-                    "{\"statusCode\":200,\"message\":\"Hello from Lambda\"}"
-            );
+            response.put("statusCode", 200);
+            response.put("message", "Hello from Lambda");
             return response;
         }
 
+        response.put("statusCode", 400);
         response.put(
-                "body",
-                "{\"statusCode\":400,\"message\":\"Bad request syntax or unsupported method. Request path: "
-                        + path + ". HTTP method: " + method + "\"}"
+                "message",
+                "Bad request syntax or unsupported method. Request path: "
+                        + path + ". HTTP method: " + method
         );
 
         return response;
     }
+
 
 }
