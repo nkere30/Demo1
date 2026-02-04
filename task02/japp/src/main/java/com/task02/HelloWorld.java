@@ -11,8 +11,10 @@ import com.syndicate.deployment.model.lambda.url.InvokeMode;
 import java.util.HashMap;
 import java.util.Map;
 
-@LambdaUrlConfig(authType = AuthType.NONE,
-invokeMode = InvokeMode.BUFFERED)
+@LambdaUrlConfig(
+        authType = AuthType.NONE,
+        invokeMode = InvokeMode.BUFFERED
+)
 @LambdaHandler(
     lambdaName = "hello_world",
 	roleName = "hello_world-role",
@@ -23,35 +25,26 @@ invokeMode = InvokeMode.BUFFERED)
 public class HelloWorld implements RequestHandler<Object, Map<String, Object>> {
 
     @Override
-    public Map<String, Object> handleRequest(Object request, Context context) {
-
-        Map<String, Object> requestMap = (Map<String, Object>) request;
-
-        Map<String, Object> requestContext =
-                (Map<String, Object>) requestMap.get("requestContext");
-        Map<String, Object> http =
-                (Map<String, Object>) requestContext.get("http");
-
-        String path = (String) http.get("path");
-        String method = (String) http.get("method");
+	public Map<String, Object> handleRequest(Object request, Context context) {
 
         Map<String, Object> response = new HashMap<>();
+
+        Map<String, Object> event = (Map<String, Object>) request;
+        String path = (String) event.get("rawPath");
+
+        Map<String, Object> requestContext = (Map<String, Object>) event.get("requestContext");
+        Map<String, Object> http = (Map<String, Object>) requestContext.get("http");
+        String method = (String) http.get("method");
 
         if ("/hello".equals(path) && "GET".equals(method)) {
             response.put("statusCode", 200);
             response.put("message", "Hello from Lambda");
-            return response;
+        } else {
+            response.put("statusCode", 400);
+            response.put(
+                    "message",
+                    "Bad request syntax or unsupported method. Request path: " + path + ". HTTP method: " + method);
         }
-
-        response.put("statusCode", 400);
-        response.put(
-                "message",
-                "Bad request syntax or unsupported method. Request path: "
-                        + path + ". HTTP method: " + method
-        );
-
         return response;
-    }
-
-
+	}
 }
