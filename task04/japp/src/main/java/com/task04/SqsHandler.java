@@ -14,7 +14,8 @@ import java.util.Map;
         roleName = "sqs_handler-role",
         isPublishVersion = true,
         aliasName = "${lambdas_alias_name}",
-        logsExpiration = RetentionSetting.SYNDICATE_ALIASES_SPECIFIED
+        logsExpiration = RetentionSetting.SYNDICATE_ALIASES_SPECIFIED,
+        timeout = 30
 )
 
 @SqsTriggerEventSource(
