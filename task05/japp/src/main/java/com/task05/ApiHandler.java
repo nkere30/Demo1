@@ -13,6 +13,7 @@ import com.syndicate.deployment.annotations.environment.EnvironmentVariables;
 
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -82,20 +83,20 @@ public class ApiHandler implements RequestHandler<Object, Map<String, Object>> {
             dynamoDb.putItem(requestDb);
         }
 
-        Map<String, Object> event = new HashMap<>();
-
+        Map<String, Object> event = new LinkedHashMap<>();
         event.put("id", id);
         event.put("principalId", principalId);
         event.put("createdAt", createdAt);
         event.put("body", content);
 
-        Map<String, Object> response = new HashMap<>();
+        Map<String, Object> responseBody = new LinkedHashMap<>();
+        responseBody.put("statusCode", 201);
+        responseBody.put("event", event);
 
+        Map<String, Object> response = new HashMap<>();
         response.put("statusCode", 201);
 
         try {
-            Map<String, Object> responseBody = new HashMap<>();
-            responseBody.put("event", event);
             response.put("body", new ObjectMapper().writeValueAsString(responseBody));
         } catch (Exception e) {
             throw new RuntimeException(e);
