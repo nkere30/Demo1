@@ -30,11 +30,13 @@ import java.util.UUID;
 public class ApiHandler implements RequestHandler<Object, Map<String, Object>> {
 
     public Map<String, Object> handleRequest(Object request, Context context) {
+
         Map<String, Object> requestMap = (Map<String, Object>) request;
+
         String tableName = System.getenv("table_name");
         String region = System.getenv("region");
 
-        Map<String,Object> bodyMap;
+        Map<String, Object> bodyMap;
 
         if (requestMap.containsKey("body")) {
             String bodyJson = (String) requestMap.get("body");
@@ -47,10 +49,13 @@ public class ApiHandler implements RequestHandler<Object, Map<String, Object>> {
             bodyMap = requestMap;
         }
 
-        Integer principalId = (Integer) bodyMap.get("principalId");
+        Number principalIdNum = (Number) bodyMap.get("principalId");
+        Integer principalId = principalIdNum.intValue();
+
         Map<String, Object> content = (Map<String, Object>) bodyMap.get("content");
 
         Map<String, AttributeValue> body = new HashMap<>();
+
         for (Map.Entry<String, Object> entry : content.entrySet()) {
             body.put(entry.getKey(), AttributeValue.builder().s(entry.getValue().toString()).build());
         }
@@ -63,6 +68,7 @@ public class ApiHandler implements RequestHandler<Object, Map<String, Object>> {
                 .build()) {
 
             Map<String, AttributeValue> item = new HashMap<>();
+
             item.put("id", AttributeValue.builder().s(id).build());
             item.put("principalId", AttributeValue.builder().n(principalId.toString()).build());
             item.put("createdAt", AttributeValue.builder().s(createdAt).build());
@@ -76,16 +82,24 @@ public class ApiHandler implements RequestHandler<Object, Map<String, Object>> {
             dynamoDb.putItem(requestDb);
         }
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("statusCode", 201);
-
         Map<String, Object> event = new HashMap<>();
+
         event.put("id", id);
         event.put("principalId", principalId);
         event.put("createdAt", createdAt);
         event.put("body", content);
 
-        response.put("event", event);
+        Map<String, Object> response = new HashMap<>();
+
+        response.put("statusCode", 201);
+
+        try {
+            Map<String, Object> responseBody = new HashMap<>();
+            responseBody.put("event", event);
+            response.put("body", new ObjectMapper().writeValueAsString(responseBody));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         return response;
     }
