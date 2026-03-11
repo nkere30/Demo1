@@ -23,15 +23,15 @@ import java.util.Map;
         aliasName = "${lambdas_alias_name}",
         logsExpiration = RetentionSetting.SYNDICATE_ALIASES_SPECIFIED
 )
+@LambdaUrlConfig(
+        authType = AuthType.NONE,
+        invokeMode = InvokeMode.BUFFERED
+)
 @LambdaLayer(
         layerName = "weather_sdk",
         libraries = {"lib/weather-sdk-1.0.0.jar"},
         runtime = DeploymentRuntime.JAVA11,
         artifactExtension = ArtifactExtension.ZIP
-)
-@LambdaUrlConfig(
-        authType = AuthType.NONE,
-        invokeMode = InvokeMode.BUFFERED
 )
 public class ApiHandler implements RequestHandler<Object, Map<String, Object>> {
 
