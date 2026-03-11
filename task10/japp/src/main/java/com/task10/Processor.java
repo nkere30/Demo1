@@ -47,8 +47,8 @@ import java.util.UUID;
 )
 public class Processor implements RequestHandler<Object, Map<String, Object>> {
 
-    private static final String API_URL = "https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&current=temperature_2m,wind_speed_10m&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m";
-	private final ObjectMapper objectMapper = new ObjectMapper();
+    private static final String API_URL = "https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&hourly=temperature_2m";
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private final DynamoDbClient dynamoDbClient = DynamoDbClient.create();
 
     @SuppressWarnings("unchecked")
