@@ -8,7 +8,8 @@ import com.syndicate.deployment.model.ArtifactExtension;
 import com.syndicate.deployment.model.DeploymentRuntime;
 import com.syndicate.deployment.model.RetentionSetting;
 import com.task09.weather.OpenMeteoClient;
-
+import com.syndicate.deployment.annotations.lambda.LambdaUrlConfig;
+import com.syndicate.deployment.model.lambda.url.AuthType;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,6 +26,9 @@ import java.util.Map;
         libraries = {"lib/weather-sdk-1.0.0.jar"},
         runtime = DeploymentRuntime.JAVA11,
         artifactExtension = ArtifactExtension.ZIP
+)
+@LambdaUrlConfig(
+        authType = AuthType.NONE
 )
 public class ApiHandler implements RequestHandler<Object, Map<String, Object>> {
 
