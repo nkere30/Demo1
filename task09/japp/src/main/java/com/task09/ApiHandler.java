@@ -5,12 +5,13 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.syndicate.deployment.annotations.lambda.LambdaHandler;
 import com.syndicate.deployment.annotations.lambda.LambdaLayer;
+import com.syndicate.deployment.annotations.lambda.LambdaUrlConfig;
 import com.syndicate.deployment.model.ArtifactExtension;
 import com.syndicate.deployment.model.DeploymentRuntime;
 import com.syndicate.deployment.model.RetentionSetting;
-import com.task09.weather.OpenMeteoClient;
-import com.syndicate.deployment.annotations.lambda.LambdaUrlConfig;
 import com.syndicate.deployment.model.lambda.url.AuthType;
+import com.syndicate.deployment.model.lambda.url.InvokeMode;
+import com.task09.weather.OpenMeteoClient;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,7 +30,8 @@ import java.util.Map;
         artifactExtension = ArtifactExtension.ZIP
 )
 @LambdaUrlConfig(
-        authType = AuthType.NONE
+        authType = AuthType.NONE,
+        invokeMode = InvokeMode.BUFFERED
 )
 public class ApiHandler implements RequestHandler<Object, Map<String, Object>> {
 
@@ -37,8 +39,10 @@ public class ApiHandler implements RequestHandler<Object, Map<String, Object>> {
         Map<String, Object> resultMap = new HashMap<>();
         try {
             Map<String, Object> req = (Map<String, Object>) request;
-            String path = (String) req.get("path");
-            String method = (String) req.get("httpMethod");
+            String path = (String) req.get("rawPath");
+            Map<String, Object> requestContext = (Map<String, Object>) req.get("requestContext");
+            Map<String, Object> http = (Map<String, Object>) requestContext.get("http");
+            String method = (String) http.get("method");
 
             if ("/weather".equals(path) && "GET".equals(method)) {
                 OpenMeteoClient client = new OpenMeteoClient();
@@ -53,7 +57,7 @@ public class ApiHandler implements RequestHandler<Object, Map<String, Object>> {
             }
         } catch (Exception e) {
             resultMap.put("statusCode", 400);
-            resultMap.put("body", "Bad request syntax or unsupported method.");
+            resultMap.put("message", "Bad request syntax or unsupported method.");
         }
         return resultMap;
     }
