@@ -20,7 +20,7 @@ import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -97,7 +97,7 @@ public class BatchProcessor implements RequestHandler<S3Event, Void> {
             ps.setString(idx++, row[2]);
             ps.setString(idx++, row[3]);
             ps.setDouble(idx++, Double.parseDouble(row[4]));
-            ps.setTimestamp(idx++, Timestamp.from(Instant.parse(row[5])));
+            ps.setTimestamp(idx++, Timestamp.valueOf(OffsetDateTime.parse(row[5]).toLocalDateTime()));
         }
         ps.executeUpdate();
     }
@@ -167,7 +167,7 @@ public class BatchProcessor implements RequestHandler<S3Event, Void> {
             ps.setString(idx++, row[2]);
             ps.setString(idx++, row[3]);
             ps.setString(idx++, row[4]);
-            ps.setTimestamp(idx++, Timestamp.from(Instant.parse(row[5])));
+            ps.setTimestamp(idx++, Timestamp.valueOf(OffsetDateTime.parse(row[5]).toLocalDateTime()));
         }
         ps.executeUpdate();
     }
