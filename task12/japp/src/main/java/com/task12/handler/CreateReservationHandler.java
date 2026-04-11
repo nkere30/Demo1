@@ -3,6 +3,8 @@ package com.task12.handler;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.PutItemRequest;
+import com.amazonaws.services.dynamodbv2.model.ScanRequest;
+import com.amazonaws.services.dynamodbv2.model.ScanResult;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,12 +31,39 @@ public class CreateReservationHandler implements RouteHandler {
         try {
             Map<String, Object> bodyMap = objectMapper.readValue(body, new TypeReference<Map<String, Object>>() {});
             Integer tableNumber = (Integer) bodyMap.get("tableNumber");
+            String tablesTableName = System.getenv("TABLES_TABLE");
+            ScanRequest scanRequest = new ScanRequest()
+                    .withTableName(tablesTableName)
+                    .withFilterExpression("number = :num")
+                    .withExpressionAttributeValues(Map.of(
+                            ":num", new AttributeValue().withN(tableNumber.toString())
+                    ));
+            ScanResult scanResult = amazonDynamoDB.scan(scanRequest);
+            if (scanResult.getItems().isEmpty()) {
+                return ResponseUtil.response(400, "Table not found");
+            }
             String clientName = (String) bodyMap.get("clientName");
             String phoneNumber = (String) bodyMap.get("phoneNumber");
             String date = (String) bodyMap.get("date");
             String slotTimeStart = (String) bodyMap.get("slotTimeStart");
             String slotTimeEnd = (String) bodyMap.get("slotTimeEnd");
             Map<String, AttributeValue> item = new HashMap<>();
+            ScanRequest reservationScan = new ScanRequest()
+                    .withTableName(tableName)
+                    .withFilterExpression("tableNumber = :tNum AND #d = :date")
+                    .withExpressionAttributeNames(Map.of("#d", "date"))
+                    .withExpressionAttributeValues(Map.of(
+                            ":tNum", new AttributeValue().withN(tableNumber.toString()),
+                            ":date", new AttributeValue().withS(date)
+                    ));
+            ScanResult existingReservations = amazonDynamoDB.scan(reservationScan);
+            for (Map<String, AttributeValue> existing : existingReservations.getItems()) {
+                String existingStart = existing.get("slotTimeStart").getS();
+                String existingEnd = existing.get("slotTimeEnd").getS();
+                if (slotTimeStart.compareTo(existingEnd) < 0 && slotTimeEnd.compareTo(existingStart) > 0) {
+                    return ResponseUtil.response(400, "Reservation overlap");
+                }
+            }
             String reservationId = UUID.randomUUID().toString();
             item.put("id", new AttributeValue().withS(reservationId));
             item.put("tableNumber", new AttributeValue().withN(tableNumber.toString()));
