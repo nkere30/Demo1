@@ -34,7 +34,8 @@ public class CreateReservationHandler implements RouteHandler {
             String tablesTableName = System.getenv("TABLES_TABLE");
             ScanRequest scanRequest = new ScanRequest()
                     .withTableName(tablesTableName)
-                    .withFilterExpression("number = :num")
+                    .withFilterExpression("#num = :num")
+                    .withExpressionAttributeNames(Map.of("#num", "number"))
                     .withExpressionAttributeValues(Map.of(
                             ":num", new AttributeValue().withN(tableNumber.toString())
                     ));
